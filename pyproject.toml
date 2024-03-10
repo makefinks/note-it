@@ -10,6 +10,10 @@ python = ">=3.10,<3.12"
 pymupdf = "^1.23.26"
 streamlit = "^1.32.0"
 anthropic = "^0.19.1"
+markdown2 = "^2.4.13"
+pdfkit = "^1.0.0"
+pypdf2 = "^3.0.1"
+wkhtmltopdf = "^0.2"
 
 
 [build-system]

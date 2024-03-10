@@ -3,7 +3,44 @@ import os
 import fitz  # Import PyMuPDF
 import asyncio
 from anthropic import AsyncAnthropic
+import markdown2
+import pdfkit
+from PyPDF2 import PdfMerger
 
+
+def create_pdf(md_folder, output_path):
+
+    files = os.listdir(md_folder)
+    markdown_files = [file for file in files if file.endswith('.md')]
+    pdf_files = []
+
+    # Convert each Markdown file to PDF
+    for md_file in markdown_files:
+        html = markdown2.markdown_path(f'{md_folder}/{md_file}')
+        pdf_file = md_file.replace('.md', '.pdf')
+        pdfkit.from_string(html, pdf_file)
+        pdf_files.append(pdf_file)
+
+    # Merge all PDF files
+    merger = PdfMerger()
+    for pdf in pdf_files:
+        merger.append(pdf)
+    merger.write(output_path)
+    merger.close()
+
+    # clean up individual PDF files
+    for pdf in pdf_files:
+        os.remove(pdf)
+
+def merge_md_files(md_folder, output_path):
+    
+    files = os.listdir(md_folder)
+    markdown_files = [file for file in files if file.endswith('.md')]
+
+    with open(output_path, 'w', encoding="utf-8") as outfile:
+        for md_file in markdown_files:
+            with open(f'{md_folder}/{md_file}', 'r', encoding="utf-8") as infile:
+                outfile.write(infile.read())
 
 
 def convert_pdf_to_images(pdf_document, save_folder):
@@ -52,7 +89,7 @@ async def convert_images_to_text(image_folder, md_folder):
 
     # run all the tasks
     await asyncio.gather(*tasks)
-
+    print("Images converted to text successfully!")
 
 
 async def convert_image_to_text(image_path, md_folder):
@@ -97,13 +134,20 @@ async def convert_image_to_text(image_path, md_folder):
     markdown = message.content[0].text
 
     # save each output file 
-    with open(f'{md_folder}/page_{page_number}.md', 'w') as f:
+    with open(f'{md_folder}/page_{page_number}.md', 'w', encoding="utf-8") as f:
         f.write(markdown)
 
 
 async def main():
-    
-    convert_pdf_to_images('handwritten_short.pdf', "images")
-    await convert_images_to_text("images", "output")
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        convert_pdf_to_images('handwritten_short.pdf', "images")
+        await convert_images_to_text("images", "output")
+        # create_pdf("output", "final_pdf.pdf")
+        merge_md_files("output", "final.md")
+    finally:
+        loop.close()
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
