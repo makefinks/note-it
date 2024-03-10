@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "note-it"
+version = "0.1.0"
+description = ""
+authors = ["makefinks <leon.fink.lf@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.12"
+pymupdf = "^1.23.26"
+streamlit = "^1.32.0"
+anthropic = "^0.19.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
