@@ -6,7 +6,7 @@ from anthropic import AsyncAnthropic
 import markdown2
 import pdfkit
 from PyPDF2 import PdfMerger
-
+from note_it.conversion.postprocessing import fix_headings_rulebased
 
 def create_pdf(md_folder, output_path):
 
@@ -37,10 +37,19 @@ def merge_md_files(md_folder, output_path):
     files = os.listdir(md_folder)
     markdown_files = [file for file in files if file.endswith('.md')]
 
+    # sort based on page number
+    markdown_files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
+
     with open(output_path, 'w', encoding="utf-8") as outfile:
         for md_file in markdown_files:
             with open(f'{md_folder}/{md_file}', 'r', encoding="utf-8") as infile:
-                outfile.write(infile.read())
+                outfile.write(f"\n{fix_headings_rulebased(infile.read())}")
+
+    print("Markdown files merged successfully!")
+    
+    # delete individual markdown files
+    for md_file in markdown_files:
+        os.remove(f'{md_folder}/{md_file}')
 
 
 def convert_pdf_to_images(pdf_document, save_folder):
@@ -65,7 +74,7 @@ def convert_pdf_to_images(pdf_document, save_folder):
     print("PDF converted to images successfully!")
 
 
-async def convert_images_to_text(image_folder, md_folder):
+async def convert_images_to_text(image_folder, md_folder, model_name):
 
     # Create the folder if it doesnt exist
     if not os.path.exists(md_folder):
@@ -76,7 +85,7 @@ async def convert_images_to_text(image_folder, md_folder):
 
     async def bounded_convert_image_to_text(file_path):
         async with semaphore:
-            return await convert_image_to_text(file_path, md_folder)
+            return await convert_image_to_text(file_path, md_folder, model_name)
 
     tasks = []    
 
@@ -91,8 +100,13 @@ async def convert_images_to_text(image_folder, md_folder):
     await asyncio.gather(*tasks)
     print("Images converted to text successfully!")
 
+    # delete images
+    for file in os.listdir(image_folder):
+        if file.endswith('.png'):
+            os.remove(os.path.join(image_folder, file))
 
-async def convert_image_to_text(image_path, md_folder):
+
+async def convert_image_to_text(image_path, md_folder, model_name):
 
     # get the page number from the image path
     page_number = image_path.split('_')[-1].split('.')[0]
@@ -106,8 +120,12 @@ async def convert_image_to_text(image_path, md_folder):
     image_data = base64.b64encode(image).decode('utf-8')
     media_type = 'image/png'
 
+    prompt = ""
+    with open("prompts/extract_metaprompt.txt", "r") as f:
+        prompt = f.read()
+
     message = await async_anthropic.messages.create(
-    model="claude-3-sonnet-20240229",
+    model=model_name,
     max_tokens=1024,
     messages=[
             {
@@ -123,7 +141,7 @@ async def convert_image_to_text(image_path, md_folder):
                     },
                     {
                         "type": "text",
-                        "text": "You are an expert in OCR (Optical Character Recognition) and are able to extract text from images with perfect accuracy. Extract the text from the image and provide me with a markdown-formatted output. Use headings and other markdown formatting where it makes sense. Directly output markdown-formatted text without a code block."
+                        "text": prompt
                     }
                 ],
             }
@@ -138,16 +156,18 @@ async def convert_image_to_text(image_path, md_folder):
         f.write(markdown)
 
 
-async def main():
+async def convert(path_to_pdf: str, model_name: str) -> bool:
+    print("Starting Conversion...")
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
-        convert_pdf_to_images('handwritten_short.pdf', "images")
-        await convert_images_to_text("images", "output")
+        convert_pdf_to_images(path_to_pdf, "images")
+        await convert_images_to_text("images", "output", model_name)
+        print("Text Conversion Done!")
+
         # create_pdf("output", "final_pdf.pdf")
         merge_md_files("output", "final.md")
+
+        return True
     finally:
         loop.close()
-
-if __name__ == "__main__":
-    asyncio.run(main())

@@ -1,0 +1,7 @@
+Your task is to extract text from the provided image and convert it into markdown format. You should use optical character recognition (OCR) to extract all the text from the image. 
+
+Once you have extracted the raw text from the image using OCR, carefully examine the visual structure and layout of the text in the image. Use this to infer the semantic structure of the text, such as what text represents headings, paragraphs, lists, etc. 
+
+Then, convert the raw extracted text into properly formatted markdown. Add markdown syntax to the text to represent the semantic structure you inferred - use hashtags for headers, hyphens for bullet points, numbers for numbered lists, and asterisks for emphasis as needed. The markdown should reflect the visual organization of the text in the original image as closely as possible.
+
+Write your final markdown output inside a code block.
