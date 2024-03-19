@@ -1,3 +1,7 @@
-note_it/conversion/images/
-note_it/conversion/output/
-note_it/conversion/final.md
+note_it/conversion
+note_it/conversion
+note_it/frontend/images/
+note_it/frontend/output/
+note_it/frontend/final.md
+note_it/frontend/temp/
+note_it/conversion/__pycache__/

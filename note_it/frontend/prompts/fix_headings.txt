@@ -1,0 +1,36 @@
+Bad headers would contain more than just keywords and would be full sentences. Here are some examples:
+
+Here are some more examples of bad headers that contain full sentences instead of just keywords:
+
+<bad_headers>
+## The Eiffel Tower is a famous landmark located in Paris, France that was completed in 1889
+## World War II lasted from 1939 to 1945 and involved most of the world's nations
+## The human brain is an incredibly complex organ that controls all functions of the body
+## Photosynthesis is the process by which plants convert sunlight into chemical energy
+## William Shakespeare was an English playwright and poet who is widely regarded as the greatest writer in the English language
+</bad_headers>
+
+In contrast, here are examples of good headers that use concise keywords:
+
+<good_headers>
+## Albert Einstein 
+### Early Life
+### Scientific Discoveries
+## Eiffel Tower
+### Construction 
+### Tourism
+## World War II
+### Causes
+### Major Battles
+### Aftermath
+## Human Brain  
+### Anatomy
+### Neuroscience
+## Photosynthesis 
+### Light Reactions
+### Calvin Cycle
+## William Shakespeare
+### Plays
+### Sonnets
+### Legacy
+</good_headers>
