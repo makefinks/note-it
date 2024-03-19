@@ -29,9 +29,6 @@ def create_pdf(md_folder, output_path):
     merger.write(output_path)
     merger.close()
 
-    """ # clean up individual PDF files
-    for pdf in pdf_files:
-        os.remove(pdf) """
 
 def merge_md_files(md_folder, output_path):
     
@@ -54,10 +51,6 @@ def merge_md_files(md_folder, output_path):
 
     print("Markdown files merged successfully!")
     
-    # delete individual markdown files
-    """ for md_file in markdown_files:
-        os.remove(f'{md_folder}/{md_file}') """
-
 
 def convert_pdf_to_images(pdf_document, save_folder):
 
@@ -74,9 +67,9 @@ def convert_pdf_to_images(pdf_document, save_folder):
     for page_num in range(len(pdf_document)):
         page = pdf_document.load_page(page_num)
         
-        # Set the desired DPI
-        dpi = 100
-        pix = page.get_pixmap(dpi=dpi)  # Render page to a pixmap with specified DPI
+        # Set the desired DPI (Image size not allowed to exceed 5mb for anthropic api)
+        dpi = 150
+        pix = page.get_pixmap(dpi=dpi)
         
         output_file = f'{save_folder}/page_{page_num}.png'
         pix.save(output_file)
@@ -95,7 +88,7 @@ async def convert_images_to_text(image_folder, md_folder):
     for file in os.listdir(md_folder):
         os.remove(os.path.join(md_folder, file))
 
-    # Semaphore to limit number of concurrent tasks
+    # Semaphore to limit number of concurrent tasks (Antrhopic rate limiting is terrible?)
     semaphore = asyncio.Semaphore(2)
 
     async def bounded_convert_image_to_text(file_path):
@@ -114,11 +107,6 @@ async def convert_images_to_text(image_folder, md_folder):
     # run all the tasks
     await asyncio.gather(*tasks)
     print("Images converted to text successfully!")
-
-    # delete images
-    """ for file in os.listdir(image_folder):
-        if file.endswith('.png'):
-            os.remove(os.path.join(image_folder, file)) """
 
 
 async def convert_image_to_text(image_path, md_folder):
@@ -171,8 +159,6 @@ async def convert_image_to_text(image_path, md_folder):
         f.write(fix_headings_rulebased(markdown))
 
 
-
-
 async def convert() -> bool:
 
     print("Starting Conversion...")
@@ -189,7 +175,7 @@ async def convert() -> bool:
 
         # create_pdf("output", "final_pdf.pdf")
         merge_md_files("output", "final.md")
-
         return True
+    
     finally:
         loop.close()
