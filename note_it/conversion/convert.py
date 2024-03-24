@@ -68,7 +68,7 @@ def convert_pdf_to_images(pdf_document, save_folder):
         page = pdf_document.load_page(page_num)
         
         # Set the desired DPI (Image size not allowed to exceed 5mb for anthropic api)
-        dpi = 150
+        dpi = 120
         pix = page.get_pixmap(dpi=dpi)
         
         output_file = f'{save_folder}/page_{page_num}.png'
@@ -88,12 +88,14 @@ async def convert_images_to_text(image_folder, md_folder):
     for file in os.listdir(md_folder):
         os.remove(os.path.join(md_folder, file))
 
-    # Semaphore to limit number of concurrent tasks (Antrhopic rate limiting is terrible?)
+    async_anthropic = AsyncAnthropic()
+
+    # Semaphore to limit number of concurrent tasks (Antrhopic rate limiting is terrible for Tier1?)
     semaphore = asyncio.Semaphore(2)
 
-    async def bounded_convert_image_to_text(file_path):
+    async def bounded_convert_image_to_text(file_path, md_folder, async_anthropic):
         async with semaphore:
-            return await convert_image_to_text(file_path, md_folder)
+            return await convert_image_to_text(file_path, md_folder, async_anthropic)
 
     tasks = []    
 
@@ -101,7 +103,7 @@ async def convert_images_to_text(image_folder, md_folder):
     for file in os.listdir(image_folder):
         if file.endswith('.png'):
             file_path = os.path.join(image_folder, file)
-            task = bounded_convert_image_to_text(file_path)
+            task = bounded_convert_image_to_text(file_path, md_folder, async_anthropic)
             tasks.append(task)
 
     # run all the tasks
@@ -109,13 +111,11 @@ async def convert_images_to_text(image_folder, md_folder):
     print("Images converted to text successfully!")
 
 
-async def convert_image_to_text(image_path, md_folder):
+async def convert_image_to_text(image_path, md_folder, asnyc_anthropic):
 
     # get the page number from the image path
     page_number = image_path.split('_')[-1].split('.')[0]
 
-    # Create an instance of the AsyncAnthropic class
-    async_anthropic = AsyncAnthropic()
 
     # base 64 encode image
     image = open(image_path, 'rb')
@@ -124,12 +124,13 @@ async def convert_image_to_text(image_path, md_folder):
     media_type = 'image/png'
 
     prompt = ""
-    with open("prompts/extract_prompt.txt", "r", encoding="utf-8") as f:
+    with open("prompts/extract_metaprompt.txt", "r", encoding="utf-8") as f:
         prompt = f.read()
 
-    message = await async_anthropic.messages.create(
+    message = await asnyc_anthropic.messages.create(
     model=st.session_state.model,
     max_tokens=1024,
+    temperature=0.1,
     messages=[
             {
                 "role": "user",

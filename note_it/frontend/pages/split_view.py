@@ -4,6 +4,7 @@ from note_it.conversion.convert import convert
 import streamlit.components.v1 as components
 import asyncio
 from PIL import Image
+from note_it.conversion.postprocessing import fix_headings_llm
 
 
 st.set_page_config(page_title="Viewer", layout="wide", initial_sidebar_state="expanded")
@@ -16,11 +17,14 @@ if st.session_state.loaded_pdf is None:
 if "convert_done" not in st.session_state:
     st.session_state.convert_done = False
 
+if "fix_headings_done" not in st.session_state:
+    st.session_state.fix_headings_done = False
+
 if st.session_state.convert_done is False:
     with st.spinner("Converting PDF to Markdown..."):
         st.session_state.convert_done = asyncio.run(convert())
 
-if st.session_state.convert_done:
+if st.session_state.convert_done or st.session_state.fix_headings_done:
     
     # get the markdown files from the output folder
     markdown_files = os.listdir("output")
@@ -42,7 +46,6 @@ if st.session_state.convert_done:
 
             with columns[1]:
                 with open(f"output/{file}", "r", encoding="utf-8") as f:
-                    #response_dict = code_editor(f.read(), lang="markdown")
                     st.write(f.read())
 
 
@@ -60,7 +63,9 @@ if "converted_markdown" in st.session_state:
         )
     with columns[1]:
         if st.button("Fix Headings 🪄", use_container_width=True):
-            pass
+            asyncio.run(fix_headings_llm("output"))
+            st.session_state.fix_headings_done = True
+            st.rerun()
 
     with columns[2]:
         if st.button("Rerun 🔁", use_container_width=True):
