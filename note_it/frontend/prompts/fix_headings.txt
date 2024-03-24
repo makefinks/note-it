@@ -1,15 +1,16 @@
-avatar
 Here is some markdown text:
 
 <markdown>
 {markdown}
 </markdown>
 
-Please analyze the structure of the headers and context in this markdown text, and write your
-analysis inside <analyze> tags.
+As an expert in language understanding and markdown formatting you are tasked to review the provided markdown.
 
-Then, correct the header formatting in the markdown text based on your analysis. Only add or remove
-header formatting (eg. #, ##, ##) - do not remove any other content especially text or the header entirely. If the headers are already formatted correctly,
-make no changes.
+Please only analyze the headers in this markdown text, and write your analysis inside <analyze> tags. Your analysis should focus on the text of the header not the hierarchical relations between headers. Remember that headers usually contain keywords not full sentences. They describe the topic of the next paragraph but also make sense by themselves.
+
+Then, correct the header formatting in the markdown text based on your analysis. Only remove header formatting (eg. #, ##, ##).
+Do not add new headers and do not remove text.
+
+If the headers are already formatted correctly make no changes.
 
 Provide the corrected markdown text inside <corrected_markdown> tags.

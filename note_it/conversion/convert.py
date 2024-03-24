@@ -38,7 +38,6 @@ def merge_md_files(md_folder, output_path):
     # sort based on page number
     markdown_files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
 
-    
     concatenated_content = ""
     for md_file in markdown_files:
         with open(f'{md_folder}/{md_file}', 'r', encoding="utf-8") as infile:

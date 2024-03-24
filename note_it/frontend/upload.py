@@ -6,6 +6,7 @@ st.set_page_config(page_title="NOTE IT", initial_sidebar_state="expanded")
 
 model_options = ["claude-3-haiku-20240307", "claude-3-sonnet-20240229", "claude-3-opus-20240229"]
 
+# Pricing as of 24.03.2024
 pricing = {
     "claude-3-sonnet-20240229":  [0.000003, 0.000015],
     "claude-3-opus-20240229": [0.000015, 0.000075],
@@ -25,8 +26,6 @@ if st.session_state.loaded_pdf is not None:
     low_bound = (num_pages * pricing[st.session_state.model][0] * 1000) + num_pages * pricing[st.session_state.model][1] * 200
     high_bound = (num_pages * pricing[st.session_state.model][0] * 1000) + num_pages * pricing[st.session_state.model][1] * 500
     st.write(f"Estimated Price: {low_bound:.2g}—{high_bound:.2g}$ ({num_pages} pages)")
-
-    # get page count of pdf
 
 
 if st.button("Submit"):
