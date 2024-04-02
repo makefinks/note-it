@@ -25,6 +25,11 @@ cd note_it/frontend/;
 python -m streamlit run upload.py
 ```
 
+# Limitations
+The quality of the output can vary depending on the type of document. Languages other than english will work but my testing was mostly done with english documents (handwritten and digital). At a certain point when the font or characters are to small the model will refuse to output the full text or anything at all. Furthermore, while the model will try to reconstruct tables and diagrams in markdown syntax the results are often poor.
+
+As with every LLM Approach you need to carefully check the generated output for mistakes.
+
 # Images
 ![Upload](img/upload.png)
 
